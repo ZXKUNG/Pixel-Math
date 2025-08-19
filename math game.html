@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมฝึกสมอง Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .menu-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .menu-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .screen {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #answer-input.correct, .choice-button.correct {
+            border-color: #34d399;
+            background-color: #d1fae5;
+            color: #065f46;
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
+        }
+        #answer-input.incorrect, .choice-button.incorrect {
+            border-color: #f87171;
+            background-color: #fee2e2;
+            color: #991b1b;
+            box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.3);
+        }
+        .category-card {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+            height: 150px;
+        }
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+        }
+        .icon-background {
+            width: 64px;
+            height: 64px;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        button:disabled:hover {
+             background-color: #6366f1; /* Keep indigo-500 color on hover when disabled */
+        }
+        .choice-button {
+            border: 2px solid #e5e7eb;
+            background-color: #f9fafb;
+            padding: 1rem; /* Increased padding */
+        }
+        .choice-button:not(:disabled):hover {
+            border-color: #a5b4fc;
+            background-color: #eef2ff;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-sm mx-auto">
+        
+        <!-- Level Selection Menu -->
+        <div id="level-selection-menu" class="screen">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800">เกมฝึกสมอง</h1>
+                <p class="text-gray-500 mt-2">เลือกเส้นทางแห่งการเรียนรู้</p>
+            </div>
+            <div class="space-y-4">
+                <button onclick="showGameCategoryMenu('kindergarten')" class="menu-card w-full text-left p-5 rounded-2xl shadow-lg flex items-center space-x-4">
+                    <div class="bg-blue-100 text-blue-500 p-3 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" /></svg></div>
+                    <div><h2 class="font-bold text-lg text-gray-800">ระดับอนุบาล</h2><p class="text-gray-500 text-sm">เริ่มต้นนับเลข รูปทรง และบวกลบ</p></div>
+                </button>
+                <button onclick="showGameCategoryMenu('elementary')" class="menu-card w-full text-left p-5 rounded-2xl shadow-lg flex items-center space-x-4">
+                     <div class="bg-green-100 text-green-500 p-3 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 16c1.255 0 2.443-.29 3.5-.804V4.804zM14.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 0114.5 16c1.255 0 2.443-.29 3.5-.804v-10A7.968 7.968 0 0014.5 4z" /></svg></div>
+                    <div><h2 class="font-bold text-lg text-gray-800">ระดับประถม</h2><p class="text-gray-500 text-sm">ฝึกฝนคูณหาร โจทย์ปัญหา และเปรียบเทียบ</p></div>
+                </button>
+                <button onclick="showGameCategoryMenu('middle')" class="menu-card w-full text-left p-5 rounded-2xl shadow-lg flex items-center space-x-4">
+                     <div class="bg-purple-100 text-purple-500 p-3 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0L7.18 7.95c-.37.22-.78.34-1.2.37L1.3 9.4c-1.6.25-2.24 2.18-1.07 3.34L4.1 16.5c.28.28.4.68.32 1.08l-1.1 4.64c-.34 1.58 1.37 2.77 2.82 1.94l4.08-2.4c.36-.22.78-.22 1.14 0l4.08 2.4c1.45.83 3.16-.36 2.82-1.94l-1.1-4.64c-.08-.4.04-.8.32-1.08l3.87-3.76c1.17-1.16.53-3.09-1.07-3.34l-4.68-.68c-.42-.03-.83-.15-1.2-.37L11.49 3.17z" clip-rule="evenodd" /></svg></div>
+                    <div><h2 class="font-bold text-lg text-gray-800">ระดับมัธยม</h2><p class="text-gray-500 text-sm">ท้าทายกับสมการ เปอร์เซ็นต์ และเศษส่วน</p></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Category Menu -->
+        <div id="game-category-menu" class="hidden screen">
+             <div class="flex items-center mb-6 relative">
+                <button onclick="showLevelSelectionMenu()" class="absolute left-0 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition"><svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                <h1 id="category-title" class="text-2xl font-bold text-gray-800 text-center w-full">เลือกหมวดหมู่</h1>
+            </div>
+            <div id="category-buttons" class="grid grid-cols-2 gap-4"></div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="hidden screen bg-white p-6 rounded-3xl shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="goBackToCategoryMenu()" class="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition"><svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
+                <div class="text-lg font-bold bg-yellow-100 text-yellow-800 px-4 py-1.5 rounded-full">คะแนน: <span id="score">0</span></div>
+            </div>
+            <h2 id="level-title" class="text-center text-gray-500 font-medium mb-4"></h2>
+            <div id="question-container" class="text-center bg-gray-50 p-6 rounded-2xl mb-5 min-h-[200px] flex items-center justify-center border">
+                <p id="question" class="text-3xl md:text-4xl font-bold text-gray-800"></p>
+                <canvas id="clock-canvas" width="180" height="180" class="hidden"></canvas>
+            </div>
+            <div id="feedback" class="mb-4 text-center text-lg font-medium h-6 transition-opacity duration-300"></div>
+            
+            <div id="answer-section">
+                <input type="text" id="answer-input" class="w-full text-center text-2xl p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition mb-2" placeholder="พิมพ์คำตอบ">
+                <p id="input-hint" class="text-center text-gray-400 text-sm mb-2 h-5">พิมพ์คำตอบเพื่อกดส่ง</p>
+                <button id="submit-button" class="w-full bg-indigo-500 text-white font-bold py-4 px-8 rounded-xl text-lg hover:bg-indigo-600 transition shadow-lg shadow-indigo-500/30">ส่งคำตอบ</button>
+            </div>
+            <div id="multiple-choice-section" class="hidden grid grid-cols-2 gap-4"></div>
+
+            <div id="action-section" class="hidden grid grid-cols-2 gap-3 mt-4">
+                 <button id="stop-button" class="w-full bg-gray-200 text-gray-700 font-bold py-4 px-8 rounded-xl text-lg hover:bg-gray-300 transition">พอแค่นี้</button>
+                <button id="continue-button" class="w-full bg-green-500 text-white font-bold py-4 px-8 rounded-xl text-lg hover:bg-green-600 transition">ไปต่อ</button>
+            </div>
+        </div>
+
+        <!-- Score Summary Screen -->
+        <div id="score-summary-screen" class="hidden screen bg-white p-8 rounded-3xl shadow-2xl text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">สรุปคะแนน</h1>
+            <p id="summary-category-name" class="text-gray-500 mb-6"></p>
+            <div class="bg-yellow-100 text-yellow-800 rounded-full w-32 h-32 flex flex-col items-center justify-center mx-auto mb-8 border-4 border-white shadow-lg">
+                <span class="text-4xl font-bold" id="final-score">0</span>
+                <span class="font-medium">คะแนน</span>
+            </div>
+             <p id="completion-message" class="text-green-600 font-semibold mb-6 hidden"></p>
+            <button id="main-menu-button" class="w-full bg-indigo-500 text-white font-bold py-4 px-8 rounded-xl text-lg hover:bg-indigo-600 transition shadow-lg shadow-indigo-500/30">กลับไปหน้าหลัก</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const screens = {
+            levelSelection: document.getElementById('level-selection-menu'),
+            category: document.getElementById('game-category-menu'),
+            game: document.getElementById('game-screen'),
+            summary: document.getElementById('score-summary-screen')
+        };
+        const categoryTitle = document.getElementById('category-title');
+        const categoryButtonsContainer = document.getElementById('category-buttons');
+        const levelTitle = document.getElementById('level-title');
+        const scoreDisplay = document.getElementById('score');
+        const questionDisplay = document.getElementById('question');
+        const clockCanvas = document.getElementById('clock-canvas');
+        const answerInput = document.getElementById('answer-input');
+        const submitButton = document.getElementById('submit-button');
+        const feedbackDisplay = document.getElementById('feedback');
+        const answerSection = document.getElementById('answer-section');
+        const multipleChoiceSection = document.getElementById('multiple-choice-section');
+        const actionSection = document.getElementById('action-section');
+        const continueButton = document.getElementById('continue-button');
+        const stopButton = document.getElementById('stop-button');
+        const summaryCategoryName = document.getElementById('summary-category-name');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const mainMenuButton = document.getElementById('main-menu-button');
+        const completionMessage = document.getElementById('completion-message');
+        const inputHint = document.getElementById('input-hint');
+        
+        // --- Game Configuration with Icons ---
+        const gameConfig = {
+            kindergarten: {
+                title: 'ระดับอนุบาล',
+                categories: [
+                    { id: 'counting', name: 'ฝึกนับเลข', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v11.494m-9-5.494h18" /></svg>', color: 'bg-red-100 text-red-500' },
+                    { id: 'addition_simple', name: 'บวกเลข', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>', color: 'bg-sky-100 text-sky-500' },
+                    { id: 'subtraction_simple', name: 'ลบเลข', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" /></svg>', color: 'bg-amber-100 text-amber-500' },
+                    { id: 'shapes', name: 'รูปทรง', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>', color: 'bg-violet-100 text-violet-500' },
+                    { id: 'odd_one_out', name: 'หาของต่างพวก', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>', color: 'bg-lime-100 text-lime-500' },
+                    { id: 'counting_on', name: 'นับเลขต่อ', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>', color: 'bg-pink-100 text-pink-500' }
+                ]
+            },
+            elementary: {
+                title: 'ระดับประถม',
+                categories: [
+                    { id: 'multiplication_table', name: 'สูตรคูณ', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>', color: 'bg-green-100 text-green-500' },
+                    { id: 'division', name: 'การหาร', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5c.667 1.667 1.333 3.333 2 5H10c.667-1.667 1.333-3.333 2-5zm0 14c-.667-1.667-1.333-3.333-2-5h4c-.667 1.667-1.333 3.333-2 5z" /></svg>', color: 'bg-red-100 text-red-500' },
+                    { id: 'operations', name: 'บวกลบคูณ', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>', color: 'bg-teal-100 text-teal-500' },
+                    { id: 'comparison', name: 'เปรียบเทียบ', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12" /><path stroke-linecap="round" stroke-linejoin="round" d="M17 13l-5 5m0 0l-5-5m5 5V6" /></svg>', color: 'bg-cyan-100 text-cyan-500' },
+                    { id: 'word_problems', name: 'โจทย์ปัญหา', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>', color: 'bg-orange-100 text-orange-500' },
+                    { id: 'time', name: 'เรื่องเวลา', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>', color: 'bg-blue-100 text-blue-500' }
+                ]
+            },
+            middle: {
+                title: 'ระดับมัธยม',
+                categories: [
+                    { id: 'equation', name: 'แก้สมการ', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7.014a8.003 8.003 0 0110.014 10.014C19.5 16 16 14.5 16 12c1 2 2.657 1.657 2.657 1.657z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1014.12 11.88a3 3 0 00-4.242 4.242z" /></svg>', color: 'bg-rose-100 text-rose-500' },
+                    { id: 'negative_numbers', name: 'เลขติดลบ', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /><path d="M15 12H9" /></svg>', color: 'bg-indigo-100 text-indigo-500' },
+                    { id: 'fractions_decimals', name: 'เศษส่วน', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>', color: 'bg-lime-100 text-lime-500' },
+                    { id: 'percentages', name: 'ร้อยละ', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>', color: 'bg-pink-100 text-pink-500' },
+                    { id: 'geometry', name: 'เรขาคณิต', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" /></svg>', color: 'bg-yellow-100 text-yellow-500' },
+                    { id: 'sequences', name: 'ลำดับตัวเลข', icon: '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" /></svg>', color: 'bg-gray-100 text-gray-500' }
+                ]
+            }
+        };
+
+        // --- Game State ---
+        let currentLevel = '', currentCategory = '', score = 0;
+        let shuffledQuestions = [], currentQuestionIndex = 0;
+
+        // --- Question Bank ---
+        const questionBank = {};
+
+        function generateQuestionBank() {
+            // Kindergarten
+            questionBank.counting = Array.from({ length: 10 }, (_, i) => ({ q: '🍎'.repeat(i + 1), a: i + 1, type: 'input' }));
+            questionBank.addition_simple = Array.from({ length: 20 }, () => { const n1 = getRandomInt(1, 10), n2 = getRandomInt(1, 10); return { q: `${n1} + ${n2} = ?`, a: n1 + n2, type: 'input' }; });
+            questionBank.subtraction_simple = Array.from({ length: 20 }, () => { const n1 = getRandomInt(5, 15), n2 = getRandomInt(1, n1 - 1); return { q: `${n1} - ${n2} = ?`, a: n1 - n2, type: 'input' }; });
+            questionBank.shapes = [ { q: 'วงกลมมีกี่ด้าน?', a: 0, type: 'input' }, { q: 'สามเหลี่ยมมีกี่มุม?', a: 3, type: 'input' }, { q: 'สี่เหลี่ยมมีกี่ด้าน?', a: 4, type: 'input' }, { q: 'ดาวมีกี่แฉก?', a: 5, type: 'input' }, { q: 'หกเหลี่ยมมีกี่มุม?', a: 6, type: 'input' } ];
+            questionBank.odd_one_out = [ { q: { text: '🍎 🍎 🍊 🍎', options: ['🍎', '🍊', '🍌', '🍓'], a: '🍊' }, type: 'choice' }, { q: { text: '🍌 🍌 🍌 🍓', options: ['🍇', '🍌', '🍓', '🍉'], a: '🍓' }, type: 'choice' }, { q: { text: '🔵 🔴 🔵 🔵', options: ['🔴', '🔵', '🟢', '🟡'], a: '🔴' }, type: 'choice' } ];
+            questionBank.counting_on = [ { q: '1, 2, 3, __?', a: 4, type: 'input' }, { q: '5, 6, 7, __?', a: 8, type: 'input' }, { q: '8, 9, 10, __?', a: 11, type: 'input' } ];
+
+            // Elementary
+            questionBank.multiplication_table = [];
+            for (let i = 2; i <= 12; i++) { for (let j = 2; j <= 12; j++) { questionBank.multiplication_table.push({ q: `${i} × ${j} = ?`, a: i * j, type: 'input' }); } }
+            questionBank.division = [ { q: '10 ÷ 2 = ?', a: 5, type: 'input' }, { q: '20 ÷ 4 = ?', a: 5, type: 'input' }, { q: '30 ÷ 5 = ?', a: 6, type: 'input' }, { q: '48 ÷ 6 = ?', a: 8, type: 'input' } ];
+            questionBank.operations = Array.from({ length: 20 }, () => { const n1 = getRandomInt(10, 99), n2 = getRandomInt(10, 99); return { q: `${n1} + ${n2} = ?`, a: n1 + n2, type: 'input' }; });
+            questionBank.comparison = Array.from({ length: 20 }, () => { let n1 = getRandomInt(1, 100), n2 = getRandomInt(1, 100); while (n1 === n2) n2 = getRandomInt(1, 100); return { q: `เลขไหนมากกว่า: ${n1} หรือ ${n2}`, a: Math.max(n1, n2), type: 'input' }; });
+            questionBank.word_problems = [ { q: 'มีมังคุด 12 ผล แบ่งให้เพื่อน 5 ผล จะเหลือเท่าไหร่?', a: 7, type: 'input' }, { q: 'ซื้อสมุด 3 เล่ม ราคาเล่มละ 15 บาท ต้องจ่ายเงินเท่าไหร่?', a: 45, type: 'input' }, { q: 'มีไก่ 8 ตัว มีเป็ด 6 ตัว รวมมีสัตว์กี่ตัว?', a: 14, type: 'input' } ];
+            questionBank.time = [ { q: { time: '03:00', options: ['03:00', '12:00', '06:00', '09:00'], a: '03:00' }, type: 'choice' }, { q: { time: '09:00', options: ['03:00', '12:00', '06:00', '09:00'], a: '09:00' }, type: 'choice' }, { q: { time: '06:30', options: ['06:00', '12:30', '06:30', '07:30'], a: '06:30' }, type: 'choice' } ];
+
+            // Middle
+            questionBank.equation = Array.from({ length: 20 }, () => { const a = getRandomInt(2, 5), x = getRandomInt(2, 10), b = getRandomInt(1, 20); return { q: `${a}x + ${b} = ${a * x + b}`, a: x, type: 'input' }; });
+            questionBank.negative_numbers = Array.from({ length: 20 }, () => { const n1 = getRandomInt(-20, 20), n2 = getRandomInt(-20, 20); return { q: `(${n1}) + (${n2}) = ?`, a: n1 + n2, type: 'input' }; });
+            questionBank.fractions_decimals = [ { q: '1/2 คือทศนิยมเท่าไหร่?', a: 0.5, type: 'input' }, { q: '1/4 คือทศนิยมเท่าไหร่?', a: 0.25, type: 'input' }, { q: '3/4 คือทศนิยมเท่าไหร่?', a: 0.75, type: 'input' }, { q: '1/5 คือทศนิยมเท่าไหร่?', a: 0.2, type: 'input' }, { q: '2/5 คือทศนิยมเท่าไหร่?', a: 0.4, type: 'input' } ];
+            questionBank.percentages = [ { q: '50% ของ 80 คือ?', a: 40, type: 'input' }, { q: '25% ของ 100 คือ?', a: 25, type: 'input' }, { q: '10% ของ 250 คือ?', a: 25, type: 'input' }, { q: '20% ของ 50 คือ?', a: 10, type: 'input' } ];
+            questionBank.geometry = [ { q: 'สี่เหลี่ยมจัตุรัสยาวด้านละ 5 ซม. มีพื้นที่เท่าไหร่?', a: 25, type: 'input' }, { q: 'สี่เหลี่ยมผืนผ้า กว้าง 4 ยาว 6 มีพื้นที่เท่าไหร่?', a: 24, type: 'input' } ];
+            questionBank.sequences = [ { q: '2, 4, 6, 8, __?', a: 10, type: 'input' }, { q: '3, 6, 9, 12, __?', a: 15, type: 'input' }, { q: '20, 15, 10, __?', a: 5, type: 'input' } ];
+        }
+
+        // --- Screen Navigation & UI Control ---
+        function showScreen(screenId) {
+            Object.values(screens).forEach(screen => screen.classList.add('hidden'));
+            screens[screenId].classList.remove('hidden');
+        }
+
+        function showLevelSelectionMenu() { showScreen('levelSelection'); }
+        
+        function goBackToCategoryMenu() {
+            resetAnswerUI();
+            showGameCategoryMenu(currentLevel);
+        }
+
+        function showGameCategoryMenu(level) {
+            currentLevel = level;
+            const levelData = gameConfig[level];
+            categoryTitle.textContent = levelData.title;
+            categoryButtonsContainer.innerHTML = ''; 
+            levelData.categories.forEach(category => {
+                const button = document.createElement('button');
+                button.className = `category-card`;
+                button.onclick = () => startGame(level, category.id);
+                button.innerHTML = `
+                    <div class="icon-background ${category.color}">
+                        ${category.icon}
+                    </div>
+                    <span class="font-semibold text-gray-700">${category.name}</span>
+                `;
+                categoryButtonsContainer.appendChild(button);
+            });
+            showScreen('category');
+        }
+
+        function showScoreSummary(isComplete = false) {
+            const categoryData = gameConfig[currentLevel].categories.find(c => c.id === currentCategory);
+            summaryCategoryName.textContent = `หมวด: ${categoryData.name}`;
+            finalScoreDisplay.textContent = score;
+            completionMessage.classList.toggle('hidden', !isComplete);
+            if(isComplete) {
+                completionMessage.textContent = '🎉 ยินดีด้วย! คุณเล่นครบทุกข้อแล้ว';
+            }
+            showScreen('summary');
+        }
+
+        function resetAnswerUI() {
+            feedbackDisplay.textContent = '';
+            answerInput.classList.remove('correct', 'incorrect');
+            actionSection.classList.add('hidden');
+            answerSection.classList.remove('hidden');
+            multipleChoiceSection.classList.add('hidden');
+            submitButton.disabled = true;
+            inputHint.classList.remove('hidden');
+        }
+        
+        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function drawClock(time) {
+            const [hour, minute] = time.split(':').map(Number);
+            const ctx = clockCanvas.getContext('2d');
+            const radius = clockCanvas.height / 2;
+            ctx.clearRect(0, 0, clockCanvas.width, clockCanvas.height);
+            ctx.translate(radius, radius);
+            
+            // Draw clock face
+            ctx.beginPath();
+            ctx.arc(0, 0, radius * 0.95, 0, 2 * Math.PI);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Draw numbers
+            ctx.font = radius * 0.15 + "px Kanit";
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
+            ctx.fillStyle = '#374151';
+            for(let num = 1; num <= 12; num++){
+                let ang = num * Math.PI / 6;
+                ctx.rotate(ang);
+                ctx.translate(0, -radius * 0.8);
+                ctx.rotate(-ang);
+                ctx.fillText(num.toString(), 0, 0);
+                ctx.rotate(ang);
+                ctx.translate(0, radius * 0.8);
+                ctx.rotate(-ang);
+            }
+
+            // Draw center
+            ctx.beginPath();
+            ctx.arc(0, 0, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#374151';
+            ctx.fill();
+
+            // Draw hour hand
+            let hourAngle = (hour % 12 + minute / 60) * (2 * Math.PI / 12) - Math.PI / 2;
+            drawHand(ctx, hourAngle, radius * 0.5, 6);
+
+            // Draw minute hand
+            let minuteAngle = (minute / 60) * (2 * Math.PI) - Math.PI / 2;
+            drawHand(ctx, minuteAngle, radius * 0.75, 4);
+
+            ctx.translate(-radius, -radius); // Reset translation
+        }
+
+        function drawHand(ctx, pos, length, width) {
+            ctx.beginPath();
+            ctx.lineWidth = width;
+            ctx.lineCap = "round";
+            ctx.moveTo(0, 0);
+            ctx.rotate(pos);
+            ctx.lineTo(length, 0);
+            ctx.stroke();
+            ctx.rotate(-pos);
+        }
+
+        // --- Game Logic ---
+        function startGame(level, category) {
+            currentLevel = level; currentCategory = category; score = 0; currentQuestionIndex = 0;
+            updateScore();
+            
+            shuffledQuestions = shuffleArray([...questionBank[category]]);
+
+            const levelData = gameConfig[level];
+            const categoryData = levelData.categories.find(c => c.id === category);
+            levelTitle.textContent = categoryData.name;
+            
+            resetAnswerUI();
+            showScreen('game');
+            displayNextQuestion();
+        }
+
+        function displayNextQuestion() {
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                showScoreSummary(true);
+                return;
+            }
+
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            
+            if (questionData.type === 'choice') {
+                answerSection.classList.add('hidden');
+                multipleChoiceSection.classList.remove('hidden');
+                multipleChoiceSection.innerHTML = '';
+
+                if (currentCategory === 'time') {
+                    questionDisplay.classList.add('hidden');
+                    clockCanvas.classList.remove('hidden');
+                    drawClock(questionData.q.time);
+                } else {
+                    questionDisplay.classList.remove('hidden');
+                    clockCanvas.classList.add('hidden');
+                    questionDisplay.textContent = questionData.q.text;
+                }
+
+                questionData.q.options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.className = "w-full choice-button font-bold rounded-xl text-lg transition";
+                    button.onclick = () => checkAnswer(option);
+                    multipleChoiceSection.appendChild(button);
+                });
+            } else {
+                answerSection.classList.remove('hidden');
+                multipleChoiceSection.classList.add('hidden');
+                questionDisplay.classList.remove('hidden');
+                clockCanvas.classList.add('hidden');
+                questionDisplay.textContent = questionData.q;
+                answerInput.value = '';
+                submitButton.disabled = true;
+                inputHint.classList.remove('hidden');
+                answerInput.focus();
+            }
+        }
+
+        function checkAnswer(choice = null) {
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const correctAnswer = questionData.q.a !== undefined ? questionData.q.a : questionData.a;
+            
+            let userAnswer;
+            if (choice !== null) {
+                userAnswer = choice;
+            } else {
+                userAnswer = (currentCategory === 'fractions_decimals') ? parseFloat(answerInput.value) : parseInt(answerInput.value);
+            }
+
+            if (choice === null && isNaN(userAnswer)) {
+                feedbackDisplay.textContent = 'กรุณาใส่คำตอบเป็นตัวเลข';
+                feedbackDisplay.className = 'text-center text-lg font-medium h-6 text-red-500';
+                return;
+            }
+
+            let isCorrect = (userAnswer == correctAnswer);
+
+            if (isCorrect) {
+                score++;
+                feedbackDisplay.textContent = 'ยอดเยี่ยม! ถูกต้องครับ 🎉';
+                feedbackDisplay.className = 'text-center text-lg font-medium h-6 text-green-500';
+                
+                if (questionData.type === 'choice') {
+                    Array.from(multipleChoiceSection.children).forEach(btn => {
+                        if(btn.textContent == correctAnswer) btn.classList.add('correct');
+                        btn.disabled = true;
+                    });
+                    actionSection.classList.remove('hidden');
+                } else {
+                    answerInput.classList.add('correct');
+                    answerSection.classList.add('hidden');
+                    actionSection.classList.remove('hidden');
+                }
+            } else {
+                feedbackDisplay.textContent = `ผิด! คำตอบคือ ${correctAnswer}`;
+                feedbackDisplay.className = 'text-center text-lg font-medium h-6 text-red-500';
+                
+                if (questionData.type === 'choice') {
+                     Array.from(multipleChoiceSection.children).forEach(btn => {
+                        if(btn.textContent == userAnswer) btn.classList.add('incorrect');
+                        if(btn.textContent == correctAnswer) btn.classList.add('correct');
+                        btn.disabled = true;
+                    });
+                } else {
+                    answerInput.classList.add('incorrect');
+                }
+
+                setTimeout(() => {
+                    resetAnswerUI();
+                    currentQuestionIndex++;
+                    displayNextQuestion();
+                }, 2000);
+            }
+            updateScore();
+        }
+
+        function continueGame() {
+            resetAnswerUI();
+            currentQuestionIndex++;
+            displayNextQuestion();
+        }
+
+        function updateScore() {
+            scoreDisplay.textContent = score;
+        }
+
+        // --- Event Listeners ---
+        submitButton.addEventListener('click', () => checkAnswer(null));
+        answerInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') { submitButton.click(); } });
+        
+        answerInput.addEventListener('input', () => {
+            const isEmpty = answerInput.value.trim() === '';
+            submitButton.disabled = isEmpty;
+            inputHint.classList.toggle('hidden', !isEmpty);
+        });
+
+        continueButton.addEventListener('click', continueGame);
+        stopButton.addEventListener('click', () => showScoreSummary(false));
+        mainMenuButton.addEventListener('click', showLevelSelectionMenu);
+
+        // --- Initial Load ---
+        generateQuestionBank();
+        showLevelSelectionMenu();
+
+    </script>
+</body>
+</html>
